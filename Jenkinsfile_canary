@@ -57,7 +57,7 @@ node {
                 def CANARY_REPLICAS=0
                 
                 echo "### Updating canary deployment file on kubernetes ####"
-                sh "sed -i 's|.*replicas:.*|replicas: ${CANARY_REPLICAS}|g' ${WORKSPACE}/train-schedule-kube-canary.yml"
+                sh "sed -i 's|replicas: .*|replicas: ${CANARY_REPLICAS}|g' ${WORKSPACE}/train-schedule-kube-canary.yml"
                 sh "cat ${WORKSPACE}/train-schedule-kube-canary.yml"
                 
                 echo "### Updating production deployment file on kubernetes ####"
