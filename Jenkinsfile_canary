@@ -1,7 +1,6 @@
 
 node {
         def DOCKER_IMAGE_NAME="ldelpozo/train-schedule"
-        def CANARY_REPLICAS=1
         stage('Clone Repo') {
                 git branch: 'master',
                 credentialsId: 'githhub_api_key',
@@ -29,6 +28,7 @@ node {
                 remote.name = "kubemaster"
                 remote.host = "$kubemaster_ip"
                 remote.allowAnyHosts = true
+                def CANARY_REPLICAS=1
                 
                 echo "### Updating canary deployment file on kubernetes ####"
                 sh "sed -i 's|\$CANARY_REPLICAS|${CANARY_REPLICAS}|g' ${WORKSPACE}/train-schedule-kube-canary.yml"
