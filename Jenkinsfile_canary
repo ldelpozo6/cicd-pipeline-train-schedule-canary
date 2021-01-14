@@ -54,6 +54,12 @@ node {
                 remote.host = "$kubemaster_ip"
                 remote.allowAnyHosts = true
                 
+                def CANARY_REPLICAS=0
+                
+                echo "### Updating canary deployment file on kubernetes ####"
+                sh "sed -i 's|.*replicas:.*|replicas: ${CANARY_REPLICAS}|g' ${WORKSPACE}/train-schedule-kube-canary.yml"
+                sh "cat ${WORKSPACE}/train-schedule-kube-canary.yml"
+                
                 echo "### Updating production deployment file on kubernetes ####"
                 sh "sed -i 's|\$DOCKER_IMAGE_NAME:\$BUILD_NUMBER|${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}|g' ${WORKSPACE}/train-schedule-kube.yml"
                 sh "cat ${WORKSPACE}/train-schedule-kube.yml"
@@ -61,6 +67,12 @@ node {
                 withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     remote.user = USERNAME
                     remote.password = USERPASS
+                    
+                    echo "### Puts a configuration file from the current workspace to remote node ####"
+                    sshPut remote: remote, from: 'train-schedule-kube-canary.yml', into: '.'
+                    
+                    echo "### Deploy configuration file on kubernetes ####"
+                    sshCommand remote: remote, command: "kubectl apply -f train-schedule-kube-canary.yml"
                     
                     echo "### Puts a configuration file from the current workspace to remote node ####"
                     sshPut remote: remote, from: 'train-schedule-kube.yml', into: '.'
